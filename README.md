@@ -1,0 +1,1 @@
+# rust_dictionary_app
