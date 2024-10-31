@@ -1,13 +1,16 @@
 use clap::{Arg, Command};
 use reqwest::Error;
+use serde_json::Value;
 
 #[tokio::main]
 async fn main(){
+    let param_word:&str = "word";
+
     let matches = Command::new(env!("CARGO_PKG_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
-        .about("Simple world definition application")
-        .arg(Arg::new("word")
+        .about("Simple word definition application")
+        .arg(Arg::new(param_word)
             .long("define")
             .short('d')
             .takes_value(true)
@@ -15,8 +18,10 @@ async fn main(){
             .help("Define a word for the word")
         )
         .get_matches();
-    let word = matches.value_of("word").unwrap();
-    println!("{:?}", word);
+
+    let word = matches.value_of(param_word).unwrap();
+
+    println!("Searching for word: {}", word);
     get_word_description(word).await.expect("Error when getting word description");
 }
 
@@ -28,7 +33,18 @@ async fn get_word_description(word: &str) -> Result<String, Error> {
         .text()
         .await?;
 
-    println!("Searched word is: {}\nResponse is:\n{:?}", word, response);
+    // Próbáljuk meg a JSON-t parse-olni
+    let json: Value = match serde_json::from_str(&response) {
+        Ok(val) => val,          // Sikeres JSON parse-olás
+        Err(_) => {
+            println!("The response is not a valid JSON:\n{}", response);
+            return Ok(response); // Ha nem JSON, akkor csak simán kiírjuk a választ
+        }
+    };
+
+    // Ha a válasz JSON, akkor szép formázás
+    println!("Definition of {}:\n{}", word,
+             serde_json::to_string_pretty(&json).unwrap());
 
     Ok(response)
 }
