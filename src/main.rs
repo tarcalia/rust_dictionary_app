@@ -33,16 +33,14 @@ async fn get_word_description(word: &str) -> Result<String, Error> {
         .text()
         .await?;
 
-    // Próbáljuk meg a JSON-t parse-olni
     let json: Value = match serde_json::from_str(&response) {
-        Ok(val) => val,          // Sikeres JSON parse-olás
+        Ok(val) => val,
         Err(_) => {
             println!("The response is not a valid JSON:\n{}", response);
-            return Ok(response); // Ha nem JSON, akkor csak simán kiírjuk a választ
+            return Ok(response);
         }
     };
 
-    // Ha a válasz JSON, akkor szép formázás
     println!("Definition of {}:\n{}", word,
              serde_json::to_string_pretty(&json).unwrap());
 
