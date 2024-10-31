@@ -4,7 +4,7 @@ use serde_json::Value;
 
 #[tokio::main]
 async fn main(){
-    let param_word:&str = "word";
+    let param_word = "word";
 
     let matches = Command::new(env!("CARGO_PKG_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
@@ -19,10 +19,11 @@ async fn main(){
         )
         .get_matches();
 
-    let word = matches.value_of(param_word).unwrap();
+    let search_word = matches.value_of(param_word).unwrap();
 
-    println!("Searching for word: {}", word);
-    get_word_description(word).await.expect("Error when getting word description");
+    println!("Searching for word: {}", search_word);
+    get_word_description(search_word)
+        .await.expect("Error when getting word description");
 }
 
 async fn get_word_description(word: &str) -> Result<String, Error> {
@@ -41,8 +42,8 @@ async fn get_word_description(word: &str) -> Result<String, Error> {
         }
     };
 
-    println!("Definition of {}:\n{}", word,
-             serde_json::to_string_pretty(&json).unwrap());
+    println!("Definition of {}:\n{}",
+             word, serde_json::to_string_pretty(&json).unwrap());
 
     Ok(response)
 }
